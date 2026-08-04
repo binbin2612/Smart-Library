@@ -81,6 +81,20 @@
                 android:textStyle="bold"/>
 
             <TextView
+                android:id="@+id/tvPriceStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Miễn phí"
+                android:textSize="11sp"
+                android:textColor="@color/white"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:background="@drawable/bg_category_tag"
+                android:backgroundTint="#4CAF50"
+                android:textStyle="bold"/>
+
+            <TextView
                 android:id="@+id/tvProgress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

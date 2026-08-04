@@ -14,5 +14,9 @@ data class Book(
     @set:PropertyName("isHidden")
     var isHidden: Boolean = false,
     val viewCount: Int = 0,
-    val favoriteCount: Int = 0
+    val favoriteCount: Int = 0,
+    @get:PropertyName("isFree")
+    @set:PropertyName("isFree")
+    var isFree: Boolean = true,
+    val previewDuration: Int = 0 // Thời gian đọc thử tính bằng phút, 0 là không giới hạn
 )

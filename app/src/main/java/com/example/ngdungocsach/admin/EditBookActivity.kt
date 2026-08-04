@@ -18,6 +18,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 
+import com.google.android.material.switchmaterial.SwitchMaterial
+
 class EditBookActivity : AppCompatActivity() {
 
     private lateinit var firebaseHelper: FirebaseHelper
@@ -29,6 +31,8 @@ class EditBookActivity : AppCompatActivity() {
     private var bookId: String = ""
     private var currentHiddenStatus: Boolean = false
     private lateinit var spinnerCategory: MaterialAutoCompleteTextView
+    private lateinit var switchIsFree: SwitchMaterial
+    private lateinit var txtPreviewDuration: TextInputEditText
     private val categories = arrayOf("Ngôn tình", "Hành động", "Trinh thám", "Kinh dị", "Khoa học", "Kỹ năng sống", "Khác")
 
     @SuppressLint("MissingInflatedId")
@@ -48,6 +52,8 @@ class EditBookActivity : AppCompatActivity() {
         txtPdfName = findViewById<TextView>(R.id.txtPdfName)
         imgBook = findViewById<ImageView>(R.id.imgBook)
         spinnerCategory = findViewById<MaterialAutoCompleteTextView>(R.id.spinnerCategory)
+        switchIsFree = findViewById<SwitchMaterial>(R.id.switchIsFree)
+        txtPreviewDuration = findViewById<TextInputEditText>(R.id.txtPreviewDuration)
         val btnUpdate = findViewById<MaterialButton>(R.id.btnUpdate)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
@@ -60,6 +66,8 @@ class EditBookActivity : AppCompatActivity() {
             firebaseHelper.getBookById(bookId) { book ->
                 if (book != null) {
                     currentHiddenStatus = book.isHidden
+                    switchIsFree.isChecked = book.isFree
+                    txtPreviewDuration.setText(book.previewDuration.toString())
                     txtTitle.setText(book.title)
                     txtAuthor.setText(book.author)
                     txtDescription.setText(book.description)
@@ -144,6 +152,8 @@ class EditBookActivity : AppCompatActivity() {
             val updatedAuthor = txtAuthor.text.toString()
             val updatedDescription = txtDescription.text.toString()
             val updatedCategory = spinnerCategory.text.toString()
+            val isFree = switchIsFree.isChecked
+            val previewDuration = txtPreviewDuration.text.toString().toIntOrNull() ?: 0
 
             if (updatedTitle.isEmpty() || updatedAuthor.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
@@ -181,7 +191,9 @@ class EditBookActivity : AppCompatActivity() {
                         description = updatedDescription,
                         pdfUrl = finalPdfUrl,
                         category = updatedCategory,
-                        isHidden = currentHiddenStatus
+                        isHidden = currentHiddenStatus,
+                        isFree = isFree,
+                        previewDuration = previewDuration
                     )
                     firebaseHelper.updateBook(updatedBook) { success ->
                         progressDialog.dismiss()

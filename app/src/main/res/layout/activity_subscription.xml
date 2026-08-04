@@ -17,9 +17,11 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginBottom="16dp"
-            app:icon="@drawable/ic_home"
+            app:icon="@drawable/ic_back"
+            app:iconSize="28dp"
             app:iconTint="@color/white"
-            android:backgroundTint="@color/surface" />
+            android:background="@android:color/transparent"
+            android:alpha="1.0" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -97,9 +99,10 @@
                     android:textSize="16sp"
                     android:textStyle="bold"/>
                 <TextView
+                    android:id="@+id/txtPriceMonth"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1.000 VNĐ / tháng"
+                    android:text="1.000 VNĐ / 30 ngày"
                     android:textColor="@color/primary"
                     android:textSize="22sp"
                     android:textStyle="bold"
@@ -137,9 +140,10 @@
                     android:textSize="16sp"
                     android:textStyle="bold"/>
                 <TextView
+                    android:id="@+id/txtPriceYear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="5.000 VNĐ / năm"
+                    android:text="5.000 VNĐ / 365 ngày"
                     android:textColor="@color/primary"
                     android:textSize="22sp"
                     android:textStyle="bold"

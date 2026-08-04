@@ -50,4 +50,16 @@ open class BaseActivity : AppCompatActivity() {
         val context = newBase.createConfigurationContext(configuration)
         super.attachBaseContext(context)
     }
+
+    /**
+     * Thiết lập Toolbar/Nút Back sắc nét cho Dark Theme
+     */
+    protected fun setupHighContrastBackButton(btnBack: com.google.android.material.button.MaterialButton) {
+        btnBack.alpha = 1.0f
+        btnBack.iconTint = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
+        btnBack.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        btnBack.rippleColor = android.content.res.ColorStateList.valueOf(
+            androidx.core.content.ContextCompat.getColor(this, R.color.surface_variant)
+        )
+    }
 }

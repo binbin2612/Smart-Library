@@ -18,12 +18,20 @@ import com.example.ngdungocsach.ui.BaseActivity
 import com.google.android.material.button.MaterialButton
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.ListenerRegistration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import android.widget.RatingBar
+import com.example.ngdungocsach.adapter.ReviewAdapter
+import com.example.ngdungocsach.model.Review
+import com.google.android.material.textfield.TextInputEditText
 
 class BookDetailActivity : BaseActivity() {
 
     private lateinit var firebaseHelper: FirebaseHelper
     private var bookId: String = ""
     private var bookListener: ListenerRegistration? = null
+    private var reviewListener: ListenerRegistration? = null
+    private lateinit var reviewAdapter: ReviewAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +47,7 @@ class BookDetailActivity : BaseActivity() {
         val txtProgress = findViewById<TextView>(R.id.txtProgress)
         val txtViewCount = findViewById<TextView>(R.id.txtViewCount)
         val txtFavoriteCount = findViewById<TextView>(R.id.txtFavoriteCount)
+        val txtPriceStatus = findViewById<TextView>(R.id.txtPriceStatus)
         val btnBack = findViewById<MaterialButton>(R.id.btnBack)
         val btnFavorite = findViewById<MaterialButton>(R.id.btnFavorite)
         val btnEditDescription = findViewById<MaterialButton>(R.id.btnEditDescription)
@@ -116,6 +125,14 @@ class BookDetailActivity : BaseActivity() {
                     txtViewCount.text = "Lượt xem: ${book.viewCount}"
                     txtFavoriteCount.text = "Yêu thích: ${book.favoriteCount}"
 
+                    if (book.isFree) {
+                        txtPriceStatus.text = "Miễn phí"
+                        txtPriceStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4CAF50"))
+                    } else {
+                        txtPriceStatus.text = "Đăng ký gói"
+                        txtPriceStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800"))
+                    }
+
                     if (book.image.isNotEmpty() && book.image.startsWith("http")) {
                         Glide.with(this@BookDetailActivity)
                             .load(book.image)
@@ -134,17 +151,28 @@ class BookDetailActivity : BaseActivity() {
                             } else if (uid != null) {
                                 firebaseHelper.getSubscriptionExpiry(uid) { expiry ->
                                     if (isFinishing || isDestroyed) return@getSubscriptionExpiry
-                                    if (expiry > System.currentTimeMillis()) {
-                                        openPdf(book.pdfUrl)
+                                    val isSubscribed = expiry > System.currentTimeMillis()
+                                    
+                                    // Cho phép đọc nếu: là Admin, đã đăng ký gói, sách miễn phí hoàn toàn, hoặc có thời gian đọc thử
+                                    if (isSubscribed || book.isFree || book.previewDuration > 0) {
+                                        // Nếu đã đăng ký gói thì không giới hạn thời gian (duration = 0)
+                                        val duration = if (isSubscribed) 0 else book.previewDuration
+                                        openPdf(book.pdfUrl, duration, isSubscribed)
                                     } else {
                                         showSubscriptionRequiredDialog()
                                     }
                                 }
                             } else {
-                                showSubscriptionRequiredDialog()
+                                // Chưa đăng nhập: cho phép đọc nếu sách miễn phí hoặc có đọc thử
+                                if (book.isFree || book.previewDuration > 0) {
+                                    openPdf(book.pdfUrl, book.previewDuration, false)
+                                } else {
+                                    Toast.makeText(this, "Vui lòng đăng nhập để đọc sách này", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
-                    } else {
+                    }
+else {
                         btnReadBook.visibility = View.GONE
                     }
                 }
@@ -176,6 +204,75 @@ class BookDetailActivity : BaseActivity() {
             startActivity(intent)
             finish()
         }
+
+        // --- Reviews Section ---
+        val rvReviews = findViewById<RecyclerView>(R.id.rvReviews)
+        val ratingBar = findViewById<RatingBar>(R.id.ratingBar)
+        val edtComment = findViewById<TextInputEditText>(R.id.edtComment)
+        val btnSubmitReview = findViewById<MaterialButton>(R.id.btnSubmitReview)
+        val layoutAddReview = findViewById<LinearLayout>(R.id.layoutAddReview)
+
+        reviewAdapter = ReviewAdapter(emptyList()) { review ->
+            if (role == "admin") {
+                AlertDialog.Builder(this)
+                    .setTitle("Xóa bình luận")
+                    .setMessage("Bạn có chắc chắn muốn xóa bình luận này vì vi phạm tiêu chuẩn cộng đồng?")
+                    .setPositiveButton("Xóa") { _, _ ->
+                        firebaseHelper.deleteReview(review.id) { success ->
+                            if (success) {
+                                Toast.makeText(this, "Đã xóa bình luận", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this, "Xóa thất bại", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                    .setNegativeButton("Hủy", null)
+                    .show()
+            }
+        }
+        rvReviews.layoutManager = LinearLayoutManager(this)
+        rvReviews.adapter = reviewAdapter
+
+        // Nếu chưa đăng nhập hoặc là admin, ẩn phần thêm review
+        if (uid == null || role == "admin") {
+            layoutAddReview.visibility = View.GONE
+        }
+
+        btnSubmitReview.setOnClickListener {
+            val rating = ratingBar.rating
+            val comment = edtComment.text.toString().trim()
+            val userName = sharedPreferences.getString("username", "Người dùng") ?: "Người dùng"
+
+            if (rating == 0f) {
+                Toast.makeText(this, "Vui lòng chọn số sao", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val review = Review(
+                bookId = bookId,
+                uid = uid ?: "",
+                displayName = userName,
+                rating = rating,
+                comment = comment
+            )
+
+            firebaseHelper.addReview(review) { success ->
+                if (success) {
+                    Toast.makeText(this, "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show()
+                    edtComment.text = null
+                    ratingBar.rating = 0f
+                } else {
+                    Toast.makeText(this, "Gửi đánh giá thất bại", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // Lắng nghe danh sách review
+        reviewListener = firebaseHelper.getReviewsForBook(bookId) { reviews ->
+            if (!isFinishing && !isDestroyed) {
+                reviewAdapter.updateData(reviews)
+            }
+        }
     }
 
     private fun updateFavoriteUI(btn: MaterialButton, isFav: Boolean) {
@@ -189,10 +286,12 @@ class BookDetailActivity : BaseActivity() {
         }
     }
 
-    private fun openPdf(pdfUrl: String) {
+    private fun openPdf(pdfUrl: String, previewDuration: Int = 0, isSubscribed: Boolean = false) {
         val intent = Intent(this, ReadBookActivity::class.java)
         intent.putExtra("pdfUrl", pdfUrl)
         intent.putExtra("bookId", bookId)
+        intent.putExtra("previewDuration", previewDuration)
+        intent.putExtra("isSubscribed", isSubscribed)
         startActivity(intent)
     }
 
@@ -271,5 +370,6 @@ class BookDetailActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         bookListener?.remove()
+        reviewListener?.remove()
     }
 }

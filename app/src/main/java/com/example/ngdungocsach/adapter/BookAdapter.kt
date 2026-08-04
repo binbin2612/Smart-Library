@@ -35,6 +35,7 @@ class BookAdapter(private var bookList: MutableList<Book>) :
         val btnEdit: MaterialButton = itemView.findViewById(R.id.btnEdit)
         val btnHide: MaterialButton = itemView.findViewById(R.id.btnHide)
         val tvProgress: TextView = itemView.findViewById(R.id.tvProgress)
+        val tvPriceStatus: TextView = itemView.findViewById(R.id.tvPriceStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
@@ -54,6 +55,16 @@ class BookAdapter(private var bookList: MutableList<Book>) :
         holder.tvBookName.text = book.title
         holder.tvAuthorName.text = book.author
         holder.tvCategoryName.text = book.category
+
+        if (book.isFree) {
+            holder.tvPriceStatus.text = "Miễn phí"
+            holder.tvPriceStatus.setBackgroundResource(R.drawable.bg_category_tag)
+            holder.tvPriceStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#4CAF50"))
+        } else {
+            holder.tvPriceStatus.text = "Đăng ký gói"
+            holder.tvPriceStatus.setBackgroundResource(R.drawable.bg_category_tag)
+            holder.tvPriceStatus.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800"))
+        }
         
         // Hiển thị tiến độ đọc
         if (uid != null) {

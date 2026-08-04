@@ -13,6 +13,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.os.Handler
+import android.os.Looper
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -26,6 +28,9 @@ class ReadBookActivity : AppCompatActivity() {
     private var bookId: String = ""
     private var uid: String = ""
     private var userRole: String = ""
+    
+    private var previewHandler: Handler? = null
+    private var previewRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +47,38 @@ class ReadBookActivity : AppCompatActivity() {
         // Lấy dữ liệu từ Intent
         val pdfUrl = intent.getStringExtra("pdfUrl") ?: ""
         bookId = intent.getStringExtra("bookId") ?: ""
+        val previewDuration = intent.getIntExtra("previewDuration", 0)
+        val isSubscribed = intent.getBooleanExtra("isSubscribed", false)
         
         if (pdfUrl.isNotEmpty()) {
             downloadAndShowPDF(pdfUrl)
+            setupPreviewTimer(previewDuration, isSubscribed)
         } else {
             Toast.makeText(this, "Không tìm thấy link sách", Toast.LENGTH_SHORT).show()
             finish()
         }
+    }
+
+    private fun setupPreviewTimer(durationMinutes: Int, isSubscribed: Boolean) {
+        // Chỉ áp dụng cho user thường, chưa đăng ký gói và sách có giới hạn thời gian
+        if (userRole != "admin" && !isSubscribed && durationMinutes > 0) {
+            Toast.makeText(this, "Bạn có $durationMinutes phút để đọc thử sách này", Toast.LENGTH_LONG).show()
+            
+            previewHandler = Handler(Looper.getMainLooper())
+            previewRunnable = Runnable {
+                if (!isFinishing && !isDestroyed) {
+                    Toast.makeText(this, "Hết thời gian đọc thử. Vui lòng đăng ký gói để tiếp tục.", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+            }
+            // Chuyển phút sang miliseconds
+            previewHandler?.postDelayed(previewRunnable!!, durationMinutes.toLong() * 60 * 1000)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        previewHandler?.removeCallbacks(previewRunnable ?: Runnable {})
     }
 
     private fun downloadAndShowPDF(pdfUrl: String) {

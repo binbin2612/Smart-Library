@@ -1,10 +1,12 @@
 package com.example.ngdungocsach.admin
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +29,8 @@ class StatisticsActivity : BaseActivity() {
     private lateinit var tvTotalBooks: TextView
     private lateinit var tvTotalViews: TextView
     private lateinit var tvTotalRevenue: TextView
+    private lateinit var tvPositiveStats: TextView
+    private lateinit var tvNegativeStats: TextView
     private lateinit var rvTopBooks: RecyclerView
     private lateinit var rvPayments: RecyclerView
     private var booksListener: ListenerRegistration? = null
@@ -39,9 +43,20 @@ class StatisticsActivity : BaseActivity() {
         tvTotalBooks = findViewById(R.id.tvTotalBooks)
         tvTotalViews = findViewById(R.id.tvTotalViews)
         tvTotalRevenue = findViewById(R.id.tvTotalRevenue)
+        tvPositiveStats = findViewById(R.id.tvPositiveStats)
+        tvNegativeStats = findViewById(R.id.tvNegativeStats)
         rvTopBooks = findViewById(R.id.rvTopBooks)
         rvPayments = findViewById(R.id.rvPayments)
         val btnBack = findViewById<MaterialButton>(R.id.btnBack)
+        val layoutPositive = findViewById<LinearLayout>(R.id.layoutPositive)
+        val layoutNegative = findViewById<LinearLayout>(R.id.layoutNegative)
+
+        layoutPositive.setOnClickListener {
+            startActivity(Intent(this, AdminBookReviewsActivity::class.java))
+        }
+        layoutNegative.setOnClickListener {
+            startActivity(Intent(this, AdminBookReviewsActivity::class.java))
+        }
 
         rvTopBooks.layoutManager = LinearLayoutManager(this)
         rvPayments.layoutManager = LinearLayoutManager(this)
@@ -85,6 +100,28 @@ class StatisticsActivity : BaseActivity() {
             val totalRevenue = payments.sumOf { it.amount }
             tvTotalRevenue.text = "%,d VNĐ".format(totalRevenue)
             rvPayments.adapter = PaymentAdapter(payments)
+        }
+
+        firebaseHelper.getReviewStatistics { stats ->
+            if (isFinishing || isDestroyed) return@getReviewStatistics
+            
+            val positive = stats["positive"] as? List<Pair<String, Int>> ?: emptyList()
+            val negative = stats["negative"] as? List<Pair<String, Int>> ?: emptyList()
+
+            // Cần lấy tên sách từ bookId
+            firebaseHelper.getAllBooks { books ->
+                val bookMap = books.associateBy({ it.id }, { it.title })
+
+                val posText = positive.joinToString("\n") { (id, count) ->
+                    "${bookMap[id] ?: id}: $count lượt 😊"
+                }
+                tvPositiveStats.text = if (posText.isNotEmpty()) posText else "Chưa có đánh giá tích cực"
+
+                val negText = negative.joinToString("\n") { (id, count) ->
+                    "${bookMap[id] ?: id}: $count lượt ☹️"
+                }
+                tvNegativeStats.text = if (negText.isNotEmpty()) negText else "Chưa có đánh giá tiêu cực"
+            }
         }
     }
 

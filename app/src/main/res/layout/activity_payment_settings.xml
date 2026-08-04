@@ -16,14 +16,17 @@
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:icon="@drawable/ic_home"
+            app:icon="@drawable/ic_back"
+            app:iconSize="28dp"
             app:iconTint="@color/white"
-            android:backgroundTint="@color/surface" />
+            android:background="@android:color/transparent"
+            android:alpha="1.0"
+            app:rippleColor="@color/surface_variant" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cài đặt Thanh toán"
+            android:text="Cài đặt thanh toán"
             android:textColor="@color/white"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -36,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cài đặt MoMo"
-            android:textColor="@color/primary"
+            android:textColor="@color/white"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
 
@@ -45,6 +48,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Link mã QR MoMo"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="2dp"
+            app:hintEnabled="true"
+            app:hintAnimationEnabled="true"
             android:layout_marginBottom="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etMomoQr"
@@ -57,8 +66,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cài đặt Ngân hàng"
-            android:textColor="@color/primary"
+            android:text="Cài đặt ngân hàng"
+            android:textColor="@color/white"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"/>
@@ -67,12 +76,114 @@
             style="@style/AppEditTextStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Link mã QR Ngân hàng"
-            android:layout_marginBottom="24dp">
+            android:hint="Link mã QR ngân hàng"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="2dp"
+            app:hintEnabled="true"
+            app:hintAnimationEnabled="true"
+            android:layout_marginBottom="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etBankQr"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- SUBSCRIPTION PACKAGES SETTINGS -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giá các gói đăng ký (VNĐ)"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AppEditTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Giá gói 1 (VNĐ)"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="2dp"
+            app:hintEnabled="true"
+            app:hintAnimationEnabled="true"
+            android:layout_marginBottom="12dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPriceMonth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="@color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AppEditTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Thời hạn gói 1 (Số ngày)"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="2dp"
+            app:hintEnabled="true"
+            app:hintAnimationEnabled="true"
+            android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDaysMonth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="@color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/surface_variant"
+            android:layout_marginBottom="16dp"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AppEditTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Giá gói 2 (VNĐ)"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="2dp"
+            app:hintEnabled="true"
+            app:hintAnimationEnabled="true"
+            android:layout_marginBottom="12dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPriceYear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textColor="@color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AppEditTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Thời hạn gói 2 (Số ngày)"
+            android:textColorHint="@color/white"
+            app:hintTextColor="@color/white"
+            app:boxStrokeColor="@color/white"
+            app:boxStrokeWidth="2dp"
+            app:hintEnabled="true"
+            app:hintAnimationEnabled="true"
+            android:layout_marginBottom="24dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDaysYear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
                 android:textColor="@color/white"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -82,17 +193,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Lưu cấu hình"
-            android:backgroundTint="@color/primary"
-            android:textColor="@color/on_primary"/>
+            android:backgroundTint="@color/white"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Lưu ý: Bạn có thể sử dụng link ảnh QR từ các dịch vụ như imgur hoặc link QR động từ ngân hàng."
-            android:textColor="@color/gray"
+            android:textColor="@color/white"
             android:textSize="12sp"
             android:layout_marginTop="16dp"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:alpha="0.9"/>
 
     </LinearLayout>
 </ScrollView>

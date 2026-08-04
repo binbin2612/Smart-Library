@@ -17,6 +17,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 
+import com.google.android.material.switchmaterial.SwitchMaterial
+
 class AdminActivity : BaseActivity() { // Đổi sang BaseActivity
 
     private lateinit var firebaseHelper: FirebaseHelper
@@ -26,6 +28,8 @@ class AdminActivity : BaseActivity() { // Đổi sang BaseActivity
     private lateinit var imgBook: ImageView
     private lateinit var tvPdfStatus: TextView
     private lateinit var spinnerCategory: MaterialAutoCompleteTextView
+    private lateinit var switchIsFree: SwitchMaterial
+    private lateinit var txtPreviewDuration: TextInputEditText
     private val categories = arrayOf("Ngôn tình", "Hành động", "Trinh thám", "Kinh dị", "Khoa học", "Kỹ năng sống", "Khác")
 
     @SuppressLint("MissingInflatedId")
@@ -45,6 +49,8 @@ class AdminActivity : BaseActivity() { // Đổi sang BaseActivity
         imgBook = findViewById(R.id.imgBook)
         tvPdfStatus = findViewById(R.id.tvPdfStatus)
         spinnerCategory = findViewById<MaterialAutoCompleteTextView>(R.id.spinnerCategory)
+        switchIsFree = findViewById<SwitchMaterial>(R.id.switchIsFree)
+        txtPreviewDuration = findViewById<TextInputEditText>(R.id.txtPreviewDuration)
         val btnAdd = findViewById<MaterialButton>(R.id.btnAdd)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, categories)
@@ -89,6 +95,8 @@ class AdminActivity : BaseActivity() { // Đổi sang BaseActivity
             val author = txtAuthor.text.toString()
             val description = txtDescription.text.toString()
             val category = spinnerCategory.text.toString()
+            val isFree = switchIsFree.isChecked
+            val previewDuration = txtPreviewDuration.text.toString().toIntOrNull() ?: 0
 
             if (title.isEmpty() || author.isEmpty()) {
                 Toast.makeText(this, "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show()
@@ -113,7 +121,9 @@ class AdminActivity : BaseActivity() { // Đổi sang BaseActivity
                     image = uploadedImageUrl,
                     description = description,
                     pdfUrl = uploadedPdfUrl,
-                    category = category
+                    category = category,
+                    isFree = isFree,
+                    previewDuration = previewDuration
                 )
                 firebaseHelper.addBook(newBook) { success ->
                     progressDialog.dismiss()
@@ -127,6 +137,8 @@ class AdminActivity : BaseActivity() { // Đổi sang BaseActivity
                         selectedImageUri = null
                         selectedPdfUri = null
                         spinnerCategory.setText("", false)
+                        switchIsFree.isChecked = true
+                        txtPreviewDuration.setText("0")
                     } else {
                         Toast.makeText(this, "Thêm sách thất bại", Toast.LENGTH_SHORT).show()
                     }

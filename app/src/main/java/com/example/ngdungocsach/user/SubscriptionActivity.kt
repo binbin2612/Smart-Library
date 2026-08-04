@@ -21,7 +21,13 @@ class SubscriptionActivity : BaseActivity() {
 
     private lateinit var firebaseHelper: FirebaseHelper
     private lateinit var txtSubscriptionStatus: TextView
+    private lateinit var txtPriceMonth: TextView
+    private lateinit var txtPriceYear: TextView
     private lateinit var btnCancelSubscription: MaterialButton
+    private var priceMonth: Long = 1000L
+    private var priceYear: Long = 5000L
+    private var daysMonth: Int = 30
+    private var daysYear: Int = 365
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,10 +46,27 @@ class SubscriptionActivity : BaseActivity() {
         }
 
         val btnBack = findViewById<MaterialButton>(R.id.btnBack)
+        setupHighContrastBackButton(btnBack)
+
         val btnSubscribeMonth = findViewById<MaterialButton>(R.id.btnSubscribeMonth)
         val btnSubscribeYear = findViewById<MaterialButton>(R.id.btnSubscribeYear)
         txtSubscriptionStatus = findViewById(R.id.txtSubscriptionStatus)
+        txtPriceMonth = findViewById(R.id.txtPriceMonth)
+        txtPriceYear = findViewById(R.id.txtPriceYear)
         btnCancelSubscription = findViewById(R.id.btnCancelSubscription)
+
+        // Tải cấu hình giá từ Admin
+        firebaseHelper.getPaymentSettings { settings ->
+            if (settings != null) {
+                priceMonth = (settings["price_month"] as? Long) ?: 1000L
+                priceYear = (settings["price_year"] as? Long) ?: 5000L
+                daysMonth = (settings["days_month"] as? Long)?.toInt() ?: 30
+                daysYear = (settings["days_year"] as? Long)?.toInt() ?: 365
+                
+                txtPriceMonth.text = "%,d VNĐ / %d ngày".format(priceMonth, daysMonth)
+                txtPriceYear.text = "%,d VNĐ / %d ngày".format(priceYear, daysYear)
+            }
+        }
 
         updateSubscriptionUI(uid)
 
@@ -56,13 +79,13 @@ class SubscriptionActivity : BaseActivity() {
 
         btnSubscribeMonth.setOnClickListener {
             if (uid != null && username != null) {
-                showPaymentDialog(uid, username, "Gói Premium Tháng", 1000, 30)
+                showPaymentDialog(uid, username, "Gói Premium $daysMonth Ngày", priceMonth, daysMonth)
             }
         }
 
         btnSubscribeYear.setOnClickListener {
             if (uid != null && username != null) {
-                showPaymentDialog(uid, username, "Gói Premium Năm", 5000, 365)
+                showPaymentDialog(uid, username, "Gói Premium $daysYear Ngày", priceYear, daysYear)
             }
         }
 

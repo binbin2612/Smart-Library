@@ -18,7 +18,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginBottom="16dp"
-            app:icon="@drawable/ic_home"
+            app:icon="@drawable/ic_back"
             app:iconTint="@color/white"
             android:backgroundTint="@color/surface" />
 
@@ -154,7 +154,32 @@
             android:textSize="12sp"
             android:textColor="@color/gray"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp"/>
+            android:layout_marginBottom="16dp"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchIsFree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Miễn phí đọc"
+            android:textColor="@color/white"
+            android:checked="true"
+            android:layout_marginBottom="16dp"
+            app:useMaterialThemeColors="true"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/AppEditTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Thời gian đọc thử (phút, 0 = không giới hạn)"
+            android:layout_marginBottom="32dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/txtPreviewDuration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="0"
+                android:textColor="@color/white"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUpdate"

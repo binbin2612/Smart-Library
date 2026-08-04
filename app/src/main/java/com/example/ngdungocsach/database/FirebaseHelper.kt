@@ -3,6 +3,7 @@ package com.example.ngdungocsach.database
 import android.util.Log
 import com.example.ngdungocsach.model.Book
 import com.example.ngdungocsach.model.User
+import com.example.ngdungocsach.model.Review
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -244,7 +245,8 @@ class FirebaseHelper {
         val data = hashMapOf(
             "title" to book.title, "author" to book.author, "category" to book.category,
             "description" to book.description, "image" to book.image, "pdfUrl" to book.pdfUrl,
-            "isHidden" to book.isHidden, "viewCount" to 0, "favoriteCount" to 0
+            "isHidden" to book.isHidden, "viewCount" to 0, "favoriteCount" to 0,
+            "isFree" to book.isFree, "previewDuration" to book.previewDuration
         )
         booksRef.add(data).addOnCompleteListener { onResult(it.isSuccessful) }
     }
@@ -253,7 +255,7 @@ class FirebaseHelper {
         val data = hashMapOf(
             "title" to book.title, "author" to book.author, "category" to book.category,
             "description" to book.description, "image" to book.image, "pdfUrl" to book.pdfUrl,
-            "isHidden" to book.isHidden
+            "isHidden" to book.isHidden, "isFree" to book.isFree, "previewDuration" to book.previewDuration
         )
         booksRef.document(book.id).update(data as Map<String, Any>).addOnCompleteListener { onResult(it.isSuccessful) }
     }
@@ -505,5 +507,61 @@ class FirebaseHelper {
     fun updatePaymentSettings(settings: Map<String, Any>, onResult: (Boolean) -> Unit) {
         settingsRef.document("payment_config").set(settings, SetOptions.merge())
             .addOnCompleteListener { onResult(it.isSuccessful) }
+    }
+
+    // --- REVIEW & RATING METHODS ---
+
+    fun getAllReviews(callback: (List<Review>) -> Unit) {
+        db.collection("reviews").get().addOnSuccessListener { snapshot ->
+            callback(snapshot.toObjects(Review::class.java))
+        }
+    }
+
+    fun addReview(review: Review, callback: (Boolean) -> Unit) {
+        val reviewId = db.collection("reviews").document().id
+        val finalReview = review.copy(id = reviewId)
+        db.collection("reviews").document(reviewId).set(finalReview)
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
+    }
+
+    fun deleteReview(reviewId: String, callback: (Boolean) -> Unit) {
+        db.collection("reviews").document(reviewId).delete()
+            .addOnSuccessListener { callback(true) }
+            .addOnFailureListener { callback(false) }
+    }
+
+    fun getReviewsForBook(bookId: String, callback: (List<Review>) -> Unit): ListenerRegistration {
+        return db.collection("reviews")
+            .whereEqualTo("bookId", bookId)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, _ ->
+                val reviews = snapshot?.toObjects(Review::class.java) ?: emptyList()
+                callback(reviews)
+            }
+    }
+
+    fun getReviewStatistics(callback: (Map<String, List<Pair<String, Int>>>) -> Unit) {
+        db.collection("reviews").get().addOnSuccessListener { snapshot ->
+            val reviews = snapshot.toObjects(Review::class.java)
+            
+            // Sách tích cực (Rating >= 4)
+            val positiveBooks = reviews.filter { it.rating >= 4 }
+                .groupBy { it.bookId }
+                .mapValues { it.value.size }
+                .toList()
+                .sortedByDescending { it.second }
+                .take(10)
+
+            // Sách tiêu cực (Rating <= 2)
+            val negativeBooks = reviews.filter { it.rating <= 2 }
+                .groupBy { it.bookId }
+                .mapValues { it.value.size }
+                .toList()
+                .sortedByDescending { it.second }
+                .take(10)
+
+            callback(mapOf("positive" to positiveBooks, "negative" to negativeBooks))
+        }
     }
 }
